@@ -73,6 +73,8 @@ def fetch_and_save_company(symbol, company_name, default_ticker):
             ts_utc = ts_utc.astimezone(datetime.timezone.utc)
 
         epoch_ms = int(ts_utc.timestamp() * 1000)
+        dt_utc_str = ts_utc.strftime("%Y-%m-%d %H:%M:%S")
+
         raw_vol = row.get("Volume", 0)
         try:
             vol_int = int(round(float(raw_vol))) if pd.notna(raw_vol) else 0
@@ -120,17 +122,6 @@ def fetch_and_save_company(symbol, company_name, default_ticker):
             to_write = to_write.sort_values("timestamp")
             to_write[HEADERS].to_csv(csv_path, index=False)
             total_candles += len(to_write)
-
-    # Symbol README
-    sym_dir = os.path.join(symbol, "1m")
-    os.makedirs(sym_dir, exist_ok=True)
-    with open(os.path.join(sym_dir, "README.md"), "w") as f:
-        f.write(f"# {symbol} - 1-Minute Historical Kline Data\n\n")
-        f.write(f"- **Company Name:** {company_name}\n")
-        f.write(f"- **Symbol:** `{symbol}`\n")
-        f.write(f"- **Candle Interval:** 1-Minute (`1m`)\n")
-        f.write(f"- **Directory Structure:** `<SYMBOL>/1m/<YYYY>/<MM>/<SYMBOL>_1m_<YYYY-MM-DD>.csv`\n")
-        f.write(f"- **Schema:** `timestamp,datetime_utc,open,high,low,close,volume`\n")
 
     return True, total_candles
 
